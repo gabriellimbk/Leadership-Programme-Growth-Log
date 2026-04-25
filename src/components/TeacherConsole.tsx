@@ -463,27 +463,47 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                         <MessageSquare size={12} /> Mentor Engine
                       </label>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-5">
+
+                      {/* Section 1 feedback */}
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-orange-400 uppercase tracking-widest italic">Perspective on Who I Am</label>
+                        <div className="pb-1 border-b border-orange-200">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section1.title}</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
+                        </div>
                         <textarea value={selectedSub.comments.section1 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section1: e.target.value } })}
-                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Mentor comments..." />
+                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
+
+                      {/* Section 2 feedback */}
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-orange-400 uppercase tracking-widest italic">Pedagogical Review</label>
+                        <div className="pb-1 border-b border-orange-200">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section2.title}</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
+                        </div>
                         <textarea value={selectedSub.comments.section2 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section2: e.target.value } })}
-                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Mentor comments..." />
+                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
+
+                      {/* Section 3 feedback */}
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-orange-400 uppercase tracking-widest italic">Diagnostic Assessment</label>
+                        <div className="pb-1 border-b border-orange-200">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section3.title}</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
+                        </div>
                         <textarea value={selectedSub.comments.section3 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section3: e.target.value } })}
-                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Mentor comments..." />
+                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
-                      <div className="space-y-4 pt-4 border-t border-orange-100">
-                        <label className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-2 block">Direct Inquiry Feedback</label>
+
+                      {/* Section 4 per-question feedback */}
+                      <div className="space-y-4 pt-2 border-t border-orange-200">
+                        <div className="pb-1 border-b border-orange-200">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section4.title}</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Per-Question Feedback</p>
+                        </div>
                         {config.section4.questions.map((q, idx) => (
                           <div key={idx} className="space-y-1">
-                            <label className="text-[8px] font-black text-orange-300 uppercase">Q{idx + 1} Response Assessment</label>
+                            <label className="text-[9px] font-black text-slate-600 uppercase">Q{idx + 1}: {q.length > 50 ? q.substring(0, 50) + '…' : q}</label>
                             <textarea
                               value={selectedSub.comments.section4?.[idx] || ''}
                               onChange={e => {
@@ -497,6 +517,7 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                           </div>
                         ))}
                       </div>
+
                     </div>
                   </div>
                 </div>

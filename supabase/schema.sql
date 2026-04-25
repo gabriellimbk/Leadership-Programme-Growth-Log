@@ -30,10 +30,11 @@ CREATE TABLE IF NOT EXISTS form_config (
 ALTER TABLE leadership_growth_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_config ENABLE ROW LEVEL SECURITY;
 
--- leadership_growth_log: open read/write (student identity enforced via Firebase Auth in the app)
+-- leadership_growth_log: open read/write/delete (student identity enforced via Firebase Auth in the app)
 CREATE POLICY "submissions_read_all"   ON leadership_growth_log FOR SELECT USING (true);
 CREATE POLICY "submissions_insert_all" ON leadership_growth_log FOR INSERT WITH CHECK (true);
 CREATE POLICY "submissions_update_all" ON leadership_growth_log FOR UPDATE USING (true);
+CREATE POLICY "submissions_delete_all" ON leadership_growth_log FOR DELETE USING (true);
 
 -- form_config: anyone can read; only authenticated Supabase users (teachers) can write
 CREATE POLICY "config_read_all"   ON form_config FOR SELECT USING (true);
