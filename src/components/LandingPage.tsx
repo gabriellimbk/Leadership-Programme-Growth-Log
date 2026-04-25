@@ -17,7 +17,7 @@ export default function LandingPage({ onSelect }: LandingPageProps) {
         <div className="flex justify-center mb-8">
           <div className="w-24 h-24 bg-[#004d33] rounded-full flex items-center justify-center p-2 shadow-2xl border-4 border-white">
             <img
-              src="/griffin.png"
+              src="/Gryphon.png"
               alt="Griffin Logo"
               className="w-full h-full object-contain"
             />

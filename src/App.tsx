@@ -42,7 +42,7 @@ function AppContent() {
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('landing')}>
             <div className="w-11 h-11 bg-[#004d33] rounded-full flex items-center justify-center p-1.5 shadow-md">
               <img
-                src="/griffin.png"
+                src="/Gryphon.png"
                 alt="Griffin"
                 className="w-full h-full object-contain"
               />
