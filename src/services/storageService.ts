@@ -97,4 +97,20 @@ export const storageService = {
     if (error) throw error;
     return rowToSubmission(data);
   },
+
+  deleteSubmission: async (studentUid: string): Promise<void> => {
+    const { error } = await supabase
+      .from('leadership_growth_log')
+      .delete()
+      .eq('student_uid', studentUid);
+    if (error) throw error;
+  },
+
+  deleteAllByTeacher: async (teacherId: string): Promise<void> => {
+    const { error } = await supabase
+      .from('leadership_growth_log')
+      .delete()
+      .eq('teacher_id', teacherId);
+    if (error) throw error;
+  },
 };
