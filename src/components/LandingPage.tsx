@@ -15,13 +15,11 @@ export default function LandingPage({ onSelect }: LandingPageProps) {
         className="mb-12 text-center"
       >
         <div className="flex justify-center mb-8">
-          <div className="w-24 h-24 bg-[#004d33] rounded-full flex items-center justify-center p-2 shadow-2xl border-4 border-white">
-            <img
-              src="/Gryphon.png"
-              alt="Griffin Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src="/Gryphon.png"
+            alt="Griffin Logo"
+            className="w-40 h-40 object-contain"
+          />
         </div>
         <h2 className="text-5xl font-black text-[#1a1a1a] tracking-tight uppercase leading-none">
           RAFFLES <br />

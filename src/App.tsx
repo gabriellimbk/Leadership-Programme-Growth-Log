@@ -40,13 +40,11 @@ function AppContent() {
       <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center space-x-4">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('landing')}>
-            <div className="w-11 h-11 bg-[#004d33] rounded-full flex items-center justify-center p-1.5 shadow-md">
-              <img
-                src="/Gryphon.png"
-                alt="Griffin"
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <img
+              src="/Gryphon.png"
+              alt="Griffin"
+              className="w-14 h-14 object-contain"
+            />
             <h1 className="text-sm font-black tracking-[0.05em] text-[#1a1a1a] uppercase leading-tight">
               RAFFLES <br />
               <span className="text-[#004d33] font-black">LEADERSHIP</span> PROGRAMME
