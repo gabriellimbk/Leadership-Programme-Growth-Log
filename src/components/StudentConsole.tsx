@@ -196,7 +196,7 @@ export default function StudentConsole({ config }: StudentConsoleProps) {
               {config.section1.columns.map((col, idx) => (
                 <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
                   <div className="bg-[#004d33] text-white p-2.5 text-center">
-                    <label className="text-[9px] font-black uppercase tracking-widest leading-none">{col}</label>
+                    <label className="text-[12px] font-black uppercase tracking-widest leading-none">{col}</label>
                   </div>
                   <textarea
                     value={answers.section1[col] || ''}
@@ -232,7 +232,7 @@ export default function StudentConsole({ config }: StudentConsoleProps) {
               {config.section2.columns.map((col, idx) => (
                 <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
                   <div className="bg-[#004d33] text-white p-2.5 text-center">
-                    <label className="text-[8px] font-black uppercase tracking-tight leading-none truncate">{col}</label>
+                    <label className="text-[11px] font-black uppercase tracking-tight leading-none truncate">{col}</label>
                   </div>
                   <textarea
                     value={answers.section2[col] || ''}
@@ -268,13 +268,13 @@ export default function StudentConsole({ config }: StudentConsoleProps) {
               {config.section3.practices.map(practice => (
                 <div key={practice} className="space-y-2">
                   <div className="flex justify-between items-center px-1">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-tight">{practice}</label>
-                    <span className="text-[10px] font-black text-[#004d33] bg-[#004d33]/5 px-2 py-0.5 rounded border border-[#004d33]/10">
+                    <label className="text-[13px] font-black text-slate-500 uppercase tracking-tight">{practice}</label>
+                    <span className="text-[11px] font-black text-[#004d33] bg-[#004d33]/5 px-2 py-0.5 rounded border border-[#004d33]/10">
                       {(answers.section3[practice] || 3).toFixed(0)} / 5
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[8px] font-black text-slate-300 uppercase">Beginner</span>
+                    <span className="text-[11px] font-black text-slate-300 uppercase">Beginner</span>
                     <input
                       type="range"
                       min="1"
@@ -284,7 +284,7 @@ export default function StudentConsole({ config }: StudentConsoleProps) {
                       onChange={e => setAnswers({ ...answers, section3: { ...answers.section3, [practice]: parseInt(e.target.value) } })}
                       className="flex-grow h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-[#004d33]"
                     />
-                    <span className="text-[8px] font-black text-[#004d33] uppercase">Mastery</span>
+                    <span className="text-[11px] font-black text-[#004d33] uppercase">Mastery</span>
                   </div>
                 </div>
               ))}

@@ -291,14 +291,15 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                 </div>
 
                 <div className="flex-1 overflow-y-auto space-y-8 pr-2">
-                  <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm space-y-4">
-                    <label className="text-[9px] font-black text-[#004d33] uppercase tracking-widest border-b border-[#004d33]/10 pb-1 block">Master Log Identity</label>
-                    <input type="text" value={editableConfig.title} onChange={e => setEditableConfig({ ...editableConfig, title: e.target.value })}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded text-[14px] font-black italic focus:ring-1 focus:ring-[#004d33] outline-none" />
-                  </div>
 
+                  {/* Section 1 */}
                   <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm space-y-4">
-                    <label className="text-[10px] font-black text-rose-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 1: Data Architecture</label>
+                    <label className="text-[10px] font-black text-rose-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 1: Who I Am</label>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-bold text-slate-400 uppercase">Instructions shown to students</label>
+                      <textarea value={editableConfig.section1.description} onChange={e => setEditableConfig({ ...editableConfig, section1: { ...editableConfig.section1, description: e.target.value } })}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-[11px] resize-none h-16 focus:bg-white outline-none" />
+                    </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       {editableConfig.section1.columns.map((c, idx) => (
                         <div key={idx} className="space-y-1">
@@ -313,8 +314,14 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                     </div>
                   </div>
 
+                  {/* Section 2 */}
                   <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm space-y-4">
-                    <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 2: Practice Alignment</label>
+                    <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 2: What Leaders Do</label>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-bold text-slate-400 uppercase">Instructions shown to students</label>
+                      <textarea value={editableConfig.section2.description} onChange={e => setEditableConfig({ ...editableConfig, section2: { ...editableConfig.section2, description: e.target.value } })}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-[11px] resize-none h-16 focus:bg-white outline-none" />
+                    </div>
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                       {editableConfig.section2.columns.map((c, idx) => (
                         <div key={idx} className="space-y-1">
@@ -335,8 +342,19 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                     </div>
                   </div>
 
+                  {/* Section 3 */}
                   <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm space-y-4">
-                    <label className="text-[10px] font-black text-amber-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 4: Reflection Inquiry</label>
+                    <label className="text-[10px] font-black text-teal-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 3: Where Am I Now?</label>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-bold text-slate-400 uppercase">Instructions shown to students</label>
+                      <textarea value={editableConfig.section3.description} onChange={e => setEditableConfig({ ...editableConfig, section3: { ...editableConfig.section3, description: e.target.value } })}
+                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-[11px] resize-none h-16 focus:bg-white outline-none" />
+                    </div>
+                  </div>
+
+                  {/* Section 4 */}
+                  <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm space-y-4">
+                    <label className="text-[10px] font-black text-amber-600 uppercase tracking-widest border-b border-slate-100 pb-2 block">Section 4: The Leader I Want To Be</label>
                     <div className="space-y-4">
                       {editableConfig.section4.questions.map((q, idx) => (
                         <div key={idx} className="flex gap-4 items-start">
@@ -354,6 +372,7 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                       ))}
                     </div>
                   </div>
+
                 </div>
               </motion.div>
             ) : selectedSub ? (
@@ -396,13 +415,13 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                   <div className="col-span-12 lg:col-span-8 space-y-4 overflow-y-auto pr-2">
                     {/* Section 1 */}
                     <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
-                      <h3 className="text-[12px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section1.title}</h3>
-                      <p className="text-[10px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section1.description}</p>
+                      <h3 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section1.title}</h3>
+                      <p className="text-[12px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section1.description}</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-[#004d33]/20 rounded-md overflow-hidden">
                         {config.section1.columns.map((col, idx) => (
                           <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
-                            <div className="bg-[#004d33] text-white p-2 text-center"><p className="text-[8px] font-black uppercase tracking-widest">{col}</p></div>
-                            <div className="bg-white p-3 min-h-[80px]"><p className="text-[10px] font-bold leading-tight text-slate-800">{selectedSub.answers.section1[col] || '—'}</p></div>
+                            <div className="bg-[#004d33] text-white p-2 text-center"><p className="text-[10px] font-black uppercase tracking-widest">{col}</p></div>
+                            <div className="bg-white p-3 min-h-[80px]"><p className="text-[12px] font-bold leading-snug text-slate-800">{selectedSub.answers.section1[col] || '—'}</p></div>
                           </div>
                         ))}
                       </div>
@@ -410,13 +429,13 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
 
                     {/* Section 2 */}
                     <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
-                      <h3 className="text-[12px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section2.title}</h3>
-                      <p className="text-[10px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section2.description}</p>
+                      <h3 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section2.title}</h3>
+                      <p className="text-[12px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section2.description}</p>
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-0 border border-[#004d33]/20 rounded-md overflow-hidden">
                         {config.section2.columns.map((col, idx) => (
                           <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
-                            <div className="bg-[#004d33] text-white p-2 text-center"><p className="text-[7px] font-black uppercase tracking-tight truncate">{col}</p></div>
-                            <div className="bg-white p-3 min-h-[100px]"><p className="text-[10px] font-bold leading-tight text-slate-800">{selectedSub.answers.section2[col] || '—'}</p></div>
+                            <div className="bg-[#004d33] text-white p-2 text-center"><p className="text-[9px] font-black uppercase tracking-tight truncate">{col}</p></div>
+                            <div className="bg-white p-3 min-h-[100px]"><p className="text-[12px] font-bold leading-snug text-slate-800">{selectedSub.answers.section2[col] || '—'}</p></div>
                           </div>
                         ))}
                       </div>
@@ -424,17 +443,17 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
 
                     {/* Section 3 */}
                     <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
-                      <h3 className="text-[12px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section3.title}</h3>
-                      <p className="text-[10px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section3.description}</p>
-                      <div className="space-y-3">
+                      <h3 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section3.title}</h3>
+                      <p className="text-[12px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section3.description}</p>
+                      <div className="space-y-4">
                         {config.section3.practices.map(practice => (
                           <div key={practice} className="flex items-center gap-3">
-                            <p className="text-[9px] font-bold text-slate-500 uppercase w-32 shrink-0 truncate">{practice}</p>
+                            <p className="text-[11px] font-bold text-slate-500 uppercase w-40 shrink-0 truncate">{practice}</p>
                             <div className="flex-grow flex items-center gap-2">
                               <div className="flex-grow h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div className="h-full bg-amber-500" style={{ width: `${((selectedSub.answers.section3[practice] || 3) / 5) * 100}%` }} />
                               </div>
-                              <span className="text-[10px] font-black text-amber-600 w-4">{selectedSub.answers.section3[practice] || 3}</span>
+                              <span className="text-[12px] font-black text-amber-600 w-5">{selectedSub.answers.section3[practice] || 3}</span>
                             </div>
                           </div>
                         ))}
@@ -443,13 +462,13 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
 
                     {/* Section 4 */}
                     <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
-                      <h3 className="text-[12px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section4.title}</h3>
-                      {config.section4.description && <p className="text-[10px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section4.description}</p>}
+                      <h3 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">{config.section4.title}</h3>
+                      {config.section4.description && <p className="text-[12px] text-slate-400 font-bold mb-5 italic border-l-4 border-transparent px-3">{config.section4.description}</p>}
                       <div className="space-y-6">
                         {config.section4.questions.map((q, idx) => (
                           <div key={idx} className="border-b border-slate-100 pb-4 last:border-0">
-                            <p className="text-[9px] font-bold text-slate-400 italic mb-2">Q{idx + 1}: {q}</p>
-                            <div className="text-[11px] font-medium text-slate-800 leading-relaxed bg-slate-50 p-3 rounded">{selectedSub.answers.section4[idx] || '—'}</div>
+                            <p className="text-[11px] font-bold text-slate-400 italic mb-2">Q{idx + 1}: {q}</p>
+                            <div className="text-[13px] font-medium text-slate-800 leading-relaxed bg-slate-50 p-3 rounded">{selectedSub.answers.section4[idx] || '—'}</div>
                           </div>
                         ))}
                       </div>
@@ -523,11 +542,114 @@ export default function TeacherConsole({ config, onConfigUpdate }: TeacherConsol
                 </div>
               </motion.div>
             ) : (
-              <div className="h-full flex items-center justify-center p-12 opacity-20 bg-slate-50">
-                <div className="text-center font-black uppercase tracking-[0.4em] text-slate-300">
-                  Select a submission to begin review
+              <motion.div
+                key="blank-template"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="h-full overflow-y-auto bg-slate-100"
+              >
+                <div className="p-6 max-w-5xl mx-auto flex flex-col space-y-4">
+
+                  {/* Section 1 */}
+                  <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
+                    <h2 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">
+                      {config.section1.title}
+                    </h2>
+                    <p className="text-[12px] text-slate-400 font-bold mb-6 italic leading-snug px-3 border-l-4 border-transparent">
+                      {config.section1.description}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-0 mb-4 border border-[#004d33]/20 rounded-md overflow-hidden">
+                      {config.section1.columns.map((col, idx) => (
+                        <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
+                          <div className="bg-[#004d33] text-white p-2.5 text-center">
+                            <label className="text-[12px] font-black uppercase tracking-widest leading-none">{col}</label>
+                          </div>
+                          <textarea disabled
+                            className="text-[11px] bg-white text-[#004d33] p-3 h-32 w-full resize-none outline-none leading-relaxed font-bold placeholder:text-slate-200 cursor-default"
+                            placeholder="Strength details..."
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 2 */}
+                  <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
+                    <h2 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">
+                      {config.section2.title}
+                    </h2>
+                    <p className="text-[12px] text-slate-400 font-bold mb-6 italic leading-snug px-3 border-l-4 border-transparent">
+                      {config.section2.description}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-0 mb-4 border border-[#004d33]/20 rounded-md overflow-hidden">
+                      {config.section2.columns.map((col, idx) => (
+                        <div key={idx} className="flex flex-col border-r last:border-r-0 border-[#004d33]/20">
+                          <div className="bg-[#004d33] text-white p-2.5 text-center">
+                            <label className="text-[11px] font-black uppercase tracking-tight leading-none">{col}</label>
+                          </div>
+                          <textarea disabled
+                            className="text-[11px] bg-white text-[#1a1a1a] p-3 h-40 w-full resize-none outline-none leading-relaxed font-bold placeholder:text-slate-200 cursor-default"
+                            placeholder="Practice actions..."
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 3 */}
+                  <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
+                    <h2 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">
+                      {config.section3.title}
+                    </h2>
+                    <p className="text-[12px] text-slate-400 font-bold mb-6 italic leading-snug px-3 border-l-4 border-transparent">
+                      {config.section3.description}
+                    </p>
+                    <div className="space-y-6">
+                      {config.section3.practices.map(practice => (
+                        <div key={practice} className="space-y-2">
+                          <div className="flex justify-between items-center px-1">
+                            <label className="text-[13px] font-black text-slate-500 uppercase tracking-tight">{practice}</label>
+                            <span className="text-[11px] font-black text-[#004d33] bg-[#004d33]/5 px-2 py-0.5 rounded border border-[#004d33]/10">— / 5</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-black text-slate-300 uppercase">Beginner</span>
+                            <input type="range" min="1" max="5" step="1" defaultValue={3} disabled
+                              className="flex-grow h-1.5 bg-slate-100 rounded-full appearance-none cursor-default accent-[#004d33] opacity-40"
+                            />
+                            <span className="text-[11px] font-black text-[#004d33] uppercase">Mastery</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 4 */}
+                  <div className="bg-white border border-slate-200 rounded-md p-5 shadow-sm">
+                    <h2 className="text-[14px] font-black text-slate-800 border-l-4 border-[#004d33] pl-3 mb-2 uppercase tracking-widest">
+                      {config.section4.title}
+                    </h2>
+                    <div className="space-y-10 pr-2">
+                      {config.section4.questions.map((q, idx) => (
+                        <div key={idx} className="space-y-4">
+                          <div className="flex gap-4">
+                            <div className="w-8 h-8 rounded-full bg-[#1a1a1a] text-white flex items-center justify-center shrink-0 text-[11px] font-black shadow-md border-2 border-white">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-grow space-y-4 text-left">
+                              <label className="text-[11px] font-bold text-slate-600 italic block leading-relaxed pr-8">{q}</label>
+                              <textarea disabled
+                                className="w-full text-[12px] border border-slate-200 rounded-md p-4 min-h-[140px] bg-slate-50/50 outline-none leading-relaxed font-medium cursor-default"
+                                placeholder="Type your structured reflection here..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </main>
