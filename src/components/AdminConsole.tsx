@@ -87,6 +87,7 @@ export default function AdminConsole({ config, onConfigUpdate, teachers, onTeach
             teachers={teachers}
             mode="admin"
             readOnly={previewMode}
+            bypassAuth={previewMode}
           />
         ) : (
           <AdminTeacherManagement

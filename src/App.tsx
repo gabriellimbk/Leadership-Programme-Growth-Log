@@ -114,7 +114,7 @@ function AppContent() {
           )}
           {view === 'teacher' && (
             <motion.div key="teacher" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-              <TeacherConsole config={config} onConfigUpdate={setConfig} teachers={teachers} />
+              <TeacherConsole config={config} onConfigUpdate={setConfig} teachers={teachers} readOnly={isLocalDataPreview} />
             </motion.div>
           )}
           {view === 'admin' && (

@@ -16,6 +16,7 @@ interface TeacherConsoleProps {
   teachers: TeacherEntry[];
   mode?: 'teacher' | 'admin';
   readOnly?: boolean;
+  bypassAuth?: boolean;
 }
 
 type EditableSectionKey = 'section1' | 'section2' | 'section3' | 'section4' | 'section5' | 'section6';
@@ -152,7 +153,7 @@ function MoveDialog({ action, teachers, onChangeTeacher, onConfirm, onCancel }: 
   );
 }
 
-export default function TeacherConsole({ config, onConfigUpdate, teachers, mode = 'teacher', readOnly = false }: TeacherConsoleProps) {
+export default function TeacherConsole({ config, onConfigUpdate, teachers, mode = 'teacher', readOnly = false, bypassAuth = false }: TeacherConsoleProps) {
   const { teacherSession, teacherLoading } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
@@ -166,12 +167,12 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
   const [moveAction, setMoveAction] = useState<MoveAction | null>(null);
 
   useEffect(() => {
-    if (!teacherSession && !readOnly) return;
+    if (!teacherSession && !bypassAuth) return;
     const assignedTeacher = teacherSession
       ? getTeacherNameForEmail(teacherSession.user.email, teachers)
       : null;
     setDataLoading(true);
-    const submissionsRequest = mode === 'admin' || readOnly
+    const submissionsRequest = mode === 'admin'
       ? storageService.getSubmissions()
       : assignedTeacher
         ? storageService.getSubmissionsByTeacher(assignedTeacher)
@@ -183,7 +184,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
         setSubmissions([]);
       })
       .finally(() => setDataLoading(false));
-  }, [mode, readOnly, teacherSession, teachers]);
+  }, [bypassAuth, mode, teacherSession, teachers]);
 
   const handleUpdateComments = async () => {
     if (!selectedSub) return;
@@ -270,7 +271,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
     if (btn) btn.style.display = 'block';
   };
 
-  if (teacherLoading && !readOnly) {
+  if (teacherLoading && !bypassAuth) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100">
         <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest animate-pulse">Loading...</div>
@@ -278,7 +279,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
     );
   }
 
-  if (!teacherSession && !readOnly) {
+  if (!teacherSession && !bypassAuth) {
     return <TeacherLogin />;
   }
 

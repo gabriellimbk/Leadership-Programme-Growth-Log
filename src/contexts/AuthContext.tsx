@@ -35,10 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isLocalDataPreview) {
-      setTeacherLoading(false);
-      return;
-    }
     supabase.auth.getSession().then(({ data }) => {
       setTeacherSession(data.session);
       setTeacherLoading(false);
