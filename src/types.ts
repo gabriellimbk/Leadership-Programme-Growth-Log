@@ -33,12 +33,12 @@ export interface FormConfig {
   section5: {
     enabled?: boolean;
     title: string;
-    question: string;
+    questions: string[];
   };
   section6: {
     enabled?: boolean;
     title: string;
-    question: string;
+    questions: string[];
   };
 }
 
@@ -53,8 +53,11 @@ export interface Submission {
     section2: Record<string, string>;
     section3: Record<string, number>;
     section4: string[];
-    section5: string;
-    section6: string;
+    section5: {
+      rating: number;
+      responses: string[];
+    };
+    section6: string[];
   };
   comments: {
     section1?: string;
