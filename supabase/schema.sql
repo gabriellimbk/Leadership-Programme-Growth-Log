@@ -126,8 +126,11 @@ CREATE POLICY "teachers_write_admin"
   USING (
     LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
       'gabriel.lim@ri.edu.sg',
-      'janissa.soh@ri.edu.sg',
       'cheekeong.lee@ri.edu.sg',
+      'ridzuan@ri.edu.sg',
+      'shi-ting.hwang@ri.edu.sg',
+      'janissa.soh@ri.edu.sg',
+      'veronica.chua@ri.edu.sg',
       'jialin.ma@ri.edu.sg',
       'kuangwen.chan@ri.edu.sg'
     ])
@@ -135,8 +138,11 @@ CREATE POLICY "teachers_write_admin"
   WITH CHECK (
     LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
       'gabriel.lim@ri.edu.sg',
-      'janissa.soh@ri.edu.sg',
       'cheekeong.lee@ri.edu.sg',
+      'ridzuan@ri.edu.sg',
+      'shi-ting.hwang@ri.edu.sg',
+      'janissa.soh@ri.edu.sg',
+      'veronica.chua@ri.edu.sg',
       'jialin.ma@ri.edu.sg',
       'kuangwen.chan@ri.edu.sg'
     ])

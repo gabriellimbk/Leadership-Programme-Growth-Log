@@ -1,7 +1,10 @@
 export const ADMIN_TEACHER_EMAILS = [
   'gabriel.lim@ri.edu.sg',
-  'janissa.soh@ri.edu.sg',
   'cheekeong.lee@ri.edu.sg',
+  'ridzuan@ri.edu.sg',
+  'shi-ting.hwang@ri.edu.sg',
+  'janissa.soh@ri.edu.sg',
+  'veronica.chua@ri.edu.sg',
   'jialin.ma@ri.edu.sg',
   'kuangwen.chan@ri.edu.sg',
 ];
