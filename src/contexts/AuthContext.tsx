@@ -3,6 +3,7 @@ import { onAuthStateChanged, User as FirebaseUser, signOut as firebaseSignOut } 
 import { Session } from '@supabase/supabase-js';
 import { auth } from '../firebase';
 import { supabase } from '../supabase';
+import { isLocalDataPreview } from '../runtimeConfig';
 
 interface AuthContextValue {
   studentUser: FirebaseUser | null;
@@ -22,6 +23,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [teacherLoading, setTeacherLoading] = useState(true);
 
   useEffect(() => {
+    if (isLocalDataPreview) {
+      setStudentLoading(false);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, (user) => {
       setStudentUser(user);
       setStudentLoading(false);
@@ -30,6 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (isLocalDataPreview) {
+      setTeacherLoading(false);
+      return;
+    }
     supabase.auth.getSession().then(({ data }) => {
       setTeacherSession(data.session);
       setTeacherLoading(false);

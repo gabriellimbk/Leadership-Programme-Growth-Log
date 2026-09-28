@@ -1,7 +1,10 @@
 import { supabase } from '../supabase';
 import { FormConfig, Submission, TeacherEntry } from '../types';
+import { assertWritable } from '../runtimeConfig';
 
-const SUBMISSIONS_TABLE = 'V2-LEADERSHIP-PROGRAMME-GROWTH-LOG';
+// Keep v1 on its original table so every existing production row remains in
+// place and continues to load after the UI upgrade.
+const SUBMISSIONS_TABLE = 'leadership_growth_log';
 const TEACHERS_TABLE = 'teachers';
 
 const DEFAULT_CONFIG: FormConfig = {
@@ -107,6 +110,17 @@ function normalizeAnswers(answers: Partial<Submission['answers']> | null | undef
   };
 }
 
+function normalizeComments(comments: Submission['comments'] | null | undefined): Submission['comments'] {
+  return {
+    ...(comments ?? {}),
+    section4: Array.isArray(comments?.section4) ? comments.section4 : [],
+  };
+}
+
+function normalizeStatus(status: unknown): Submission['status'] {
+  return status === 'submitted' || status === 'reviewed' ? status : 'draft';
+}
+
 function rowToSubmission(row: any): Submission {
   return {
     id: row.id,
@@ -115,57 +129,64 @@ function rowToSubmission(row: any): Submission {
     studentName: row.student_name,
     teacherId: row.teacher_id,
     answers: normalizeAnswers(row.answers),
-    comments: row.comments ?? {},
-    status: row.status,
+    comments: normalizeComments(row.comments),
+    status: normalizeStatus(row.status),
     updatedAt: row.updated_at,
   };
 }
 
 export const storageService = {
   getConfig: async (): Promise<FormConfig> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('form_config')
       .select('config')
       .eq('id', 'default')
       .maybeSingle();
+    if (error) throw error;
     return normalizeConfig(data?.config);
   },
 
   saveConfig: async (config: FormConfig): Promise<void> => {
-    await supabase.from('form_config').upsert({
+    assertWritable('Saving the framework configuration');
+    const { error } = await supabase.from('form_config').upsert({
       id: 'default',
       config: normalizeConfig(config),
       updated_at: new Date().toISOString()
     });
+    if (error) throw error;
   },
 
   getSubmissions: async (): Promise<Submission[]> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .select('*')
       .order('updated_at', { ascending: false });
+    if (error) throw error;
     return (data ?? []).map(rowToSubmission);
   },
 
   getSubmissionsByTeacher: async (teacherId: string): Promise<Submission[]> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .select('*')
       .eq('teacher_id', teacherId)
       .order('updated_at', { ascending: false });
+    if (error) throw error;
     return (data ?? []).map(rowToSubmission);
   },
 
   getSubmissionByUid: async (uid: string): Promise<Submission | null> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .select('*')
       .eq('student_uid', uid)
       .maybeSingle();
+    if (error) throw error;
     return data ? rowToSubmission(data) : null;
   },
 
   saveSubmission: async (submission: Submission): Promise<Submission> => {
+    assertWritable('Saving a submission');
     const { data, error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .upsert({
@@ -185,6 +206,7 @@ export const storageService = {
   },
 
   deleteSubmission: async (studentUid: string): Promise<void> => {
+    assertWritable('Deleting a submission');
     const { error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .delete()
@@ -193,6 +215,7 @@ export const storageService = {
   },
 
   deleteAllByTeacher: async (teacherId: string): Promise<void> => {
+    assertWritable('Deleting teacher submissions');
     const { error } = await supabase
       .from(SUBMISSIONS_TABLE)
       .delete()
@@ -210,6 +233,7 @@ export const storageService = {
   },
 
   addTeacher: async (name: string, email: string): Promise<TeacherEntry> => {
+    assertWritable('Adding a teacher');
     const { data, error } = await supabase
       .from(TEACHERS_TABLE)
       .insert({ name: name.trim(), email: email.trim().toLowerCase() })
@@ -220,6 +244,7 @@ export const storageService = {
   },
 
   updateTeacher: async (id: string, name: string, email: string): Promise<TeacherEntry> => {
+    assertWritable('Updating a teacher');
     const { data, error } = await supabase
       .from(TEACHERS_TABLE)
       .update({ name: name.trim(), email: email.trim().toLowerCase() })
@@ -231,6 +256,7 @@ export const storageService = {
   },
 
   deleteTeacher: async (id: string): Promise<void> => {
+    assertWritable('Deleting a teacher');
     const { error } = await supabase
       .from(TEACHERS_TABLE)
       .delete()

@@ -12,15 +12,16 @@ interface AdminConsoleProps {
   onConfigUpdate: (config: FormConfig) => void;
   teachers: TeacherEntry[];
   onTeachersUpdate: (teachers: TeacherEntry[]) => void;
+  previewMode?: boolean;
 }
 
 type AdminTab = 'submissions' | 'teachers';
 
-export default function AdminConsole({ config, onConfigUpdate, teachers, onTeachersUpdate }: AdminConsoleProps) {
+export default function AdminConsole({ config, onConfigUpdate, teachers, onTeachersUpdate, previewMode = false }: AdminConsoleProps) {
   const { teacherSession, teacherLoading } = useAuth();
   const [tab, setTab] = useState<AdminTab>('submissions');
 
-  if (teacherLoading) {
+  if (teacherLoading && !previewMode) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100">
         <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest animate-pulse">
@@ -30,11 +31,11 @@ export default function AdminConsole({ config, onConfigUpdate, teachers, onTeach
     );
   }
 
-  if (!teacherSession) {
+  if (!teacherSession && !previewMode) {
     return <TeacherLogin />;
   }
 
-  if (!isAdminTeacherEmail(teacherSession.user.email)) {
+  if (!previewMode && !isAdminTeacherEmail(teacherSession?.user.email)) {
     return (
       <div className="h-full flex items-center justify-center p-6 bg-slate-100">
         <div className="w-full max-w-sm bg-white border border-slate-200 rounded-md p-8 shadow-sm text-center">
@@ -52,7 +53,7 @@ export default function AdminConsole({ config, onConfigUpdate, teachers, onTeach
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="shrink-0 bg-white border-b border-slate-200 px-6 py-2 flex items-center gap-2">
+      <div className="shrink-0 bg-white border-b border-slate-200 px-3 md:px-6 py-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex bg-slate-100 rounded p-1">
           <button
             onClick={() => setTab('submissions')}
@@ -71,6 +72,11 @@ export default function AdminConsole({ config, onConfigUpdate, teachers, onTeach
             <Users size={11} /> Teachers
           </button>
         </div>
+        {previewMode && (
+          <div data-testid="read-only-preview-banner" className="rounded border border-amber-200 bg-amber-50 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-amber-800">
+            Live data preview · all writes blocked
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-hidden">
@@ -80,11 +86,13 @@ export default function AdminConsole({ config, onConfigUpdate, teachers, onTeach
             onConfigUpdate={onConfigUpdate}
             teachers={teachers}
             mode="admin"
+            readOnly={previewMode}
           />
         ) : (
           <AdminTeacherManagement
             teachers={teachers}
             onTeachersUpdate={onTeachersUpdate}
+            readOnly={previewMode}
           />
         )}
       </div>

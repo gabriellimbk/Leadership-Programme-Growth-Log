@@ -15,6 +15,7 @@ interface TeacherConsoleProps {
   onConfigUpdate: (config: FormConfig) => void;
   teachers: TeacherEntry[];
   mode?: 'teacher' | 'admin';
+  readOnly?: boolean;
 }
 
 type EditableSectionKey = 'section1' | 'section2' | 'section3' | 'section4' | 'section5' | 'section6';
@@ -44,7 +45,14 @@ function getPracticeScoreKey(index: number) {
 }
 
 function getPracticeScore(section3Answers: Submission['answers']['section3'], practice: string, index: number) {
-  return section3Answers[getPracticeScoreKey(index)] ?? section3Answers[practice] ?? 3;
+  const exact = section3Answers[getPracticeScoreKey(index)] ?? section3Answers[practice];
+  if (exact !== undefined) return exact;
+
+  const normalizedPractice = practice.trim().toLocaleLowerCase();
+  const legacyMatch = Object.entries(section3Answers).find(
+    ([key]) => key.trim().toLocaleLowerCase() === normalizedPractice
+  );
+  return legacyMatch?.[1] ?? 3;
 }
 
 type ConfirmAction =
@@ -160,7 +168,7 @@ function MoveDialog({ action, teachers, onChangeTeacher, onConfirm, onCancel }: 
   );
 }
 
-export default function TeacherConsole({ config, onConfigUpdate, teachers, mode = 'teacher' }: TeacherConsoleProps) {
+export default function TeacherConsole({ config, onConfigUpdate, teachers, mode = 'teacher', readOnly = false }: TeacherConsoleProps) {
   const { teacherSession, teacherLoading } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
@@ -174,19 +182,24 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
   const [moveAction, setMoveAction] = useState<MoveAction | null>(null);
 
   useEffect(() => {
-    if (!teacherSession) return;
-    const assignedTeacher = getTeacherNameForEmail(teacherSession.user.email, teachers);
+    if (!teacherSession && !readOnly) return;
+    const assignedTeacher = teacherSession
+      ? getTeacherNameForEmail(teacherSession.user.email, teachers)
+      : null;
     setDataLoading(true);
-    const submissionsRequest = mode === 'admin'
+    const submissionsRequest = mode === 'admin' || readOnly
       ? storageService.getSubmissions()
       : assignedTeacher
         ? storageService.getSubmissionsByTeacher(assignedTeacher)
         : Promise.resolve([]);
-    submissionsRequest.then(data => {
-      setSubmissions(data);
-      setDataLoading(false);
-    });
-  }, [mode, teacherSession, teachers]);
+    submissionsRequest
+      .then(setSubmissions)
+      .catch(error => {
+        console.error('Failed to load submissions:', error);
+        setSubmissions([]);
+      })
+      .finally(() => setDataLoading(false));
+  }, [mode, readOnly, teacherSession, teachers]);
 
   const handleUpdateComments = async () => {
     if (!selectedSub) return;
@@ -196,7 +209,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
       const saved = await storageService.saveSubmission(updatedSub);
       setSubmissions(prev => prev.map(s => s.studentUid === saved.studentUid ? saved : s));
       setSelectedSub(saved);
-      notificationService.notifyStudentOfTeacherReview(saved).catch(error => {
+      notificationService.notifyStudentOfTeacherReview(saved, teacherSession!.access_token).catch(error => {
         console.error('Failed to send student notification:', error);
       });
     } finally {
@@ -279,7 +292,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
     if (btn) btn.style.display = 'block';
   };
 
-  if (teacherLoading) {
+  if (teacherLoading && !readOnly) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100">
         <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest animate-pulse">Loading...</div>
@@ -287,12 +300,14 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
     );
   }
 
-  if (!teacherSession) {
+  if (!teacherSession && !readOnly) {
     return <TeacherLogin />;
   }
 
   const isAdminMode = mode === 'admin';
-  const assignedTeacherName = getTeacherNameForEmail(teacherSession.user.email, teachers);
+  const assignedTeacherName = teacherSession
+    ? getTeacherNameForEmail(teacherSession.user.email, teachers)
+    : null;
 
   const filteredSubmissions = submissions.filter(s => {
     const matchesOwnTeacher = isAdminMode || s.teacherId === assignedTeacherName;
@@ -325,21 +340,21 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
         />
       )}
 
-      <div className="h-full flex overflow-hidden bg-slate-100">
+      <div className="h-full flex flex-col md:flex-row overflow-hidden bg-slate-100">
         {/* Sidebar */}
-        <aside className="w-64 bg-[#1a1a1a] border-r border-[#27272a] p-4 space-y-3 shrink-0 flex flex-col overflow-hidden text-white">
+        <aside className="w-full h-56 md:h-auto md:w-64 bg-[#1a1a1a] border-b md:border-b-0 md:border-r border-[#27272a] p-3 md:p-4 space-y-3 shrink-0 flex flex-col overflow-hidden text-white">
 
           {/* Header row: title + settings gear */}
           <div className="flex justify-between items-center px-1">
             <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
               {isAdminMode ? 'Admin Growth Log Queue' : 'Growth Log Queue'}
             </label>
-            <button
+            {!readOnly && <button
               onClick={() => { setEditableConfig(config); setIsEditingConfig(!isEditingConfig); }}
               className={`p-1.5 rounded transition-all ${isEditingConfig ? 'bg-[#004d33] text-white shadow-lg' : 'hover:bg-white/5 text-slate-500'}`}
             >
               <Settings size={12} />
-            </button>
+            </button>}
           </div>
 
           {isAdminMode ? (
@@ -381,7 +396,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
           </div>
 
           {/* Delete All button — only shown when a teacher is selected */}
-          {isAdminMode && filterTeacher && (
+          {isAdminMode && filterTeacher && !readOnly && (
             <button
               onClick={() => setConfirmAction({ type: 'delete-all', teacher: filterTeacher })}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded border border-red-900/40 bg-red-900/20 text-red-400 text-[9px] font-black uppercase tracking-widest hover:bg-red-900/40 transition-all"
@@ -399,6 +414,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
             ) : filteredSubmissions.map(s => (
               <div
                 key={s.studentUid}
+                data-testid="submission-row"
                 className={`w-full flex items-center justify-between p-3 rounded-md border transition-all text-left group ${
                   selectedSub?.studentUid === s.studentUid
                     ? 'border-[#004d33]/50 bg-[#004d33]/10 text-white shadow-inner'
@@ -422,7 +438,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                   <ChevronRight size={10} className={`shrink-0 mx-1 transition-transform ${selectedSub?.studentUid === s.studentUid ? 'translate-x-0.5 text-[#004d33]' : 'opacity-20'}`} />
                 </button>
 
-                {isAdminMode && (
+                {isAdminMode && !readOnly && (
                   <button
                     onClick={e => {
                       e.stopPropagation();
@@ -436,13 +452,13 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                 )}
 
                 {/* Delete button */}
-                <button
+                {!readOnly && <button
                   onClick={e => { e.stopPropagation(); setConfirmAction({ type: 'delete-one', submission: s }); }}
                   className="shrink-0 p-1 rounded text-slate-600 hover:text-red-400 hover:bg-red-900/20 transition-all"
                   title="Delete submission"
                 >
                   <Trash2 size={11} />
-                </button>
+                </button>}
               </div>
             ))}
           </div>
@@ -800,7 +816,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                     <button id="export-btn" onClick={exportToPDF} className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-100 transition-all" title="Export PDF">
                       <Download size={14} />
                     </button>
-                    {isAdminMode && (
+                    {isAdminMode && !readOnly && (
                       <button
                         onClick={() => setMoveAction({ submission: selectedSub, targetTeacher: '' })}
                         className="p-2 border border-emerald-200 rounded text-emerald-600 hover:bg-emerald-50 transition-all"
@@ -809,16 +825,16 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                         <MoveRight size={14} />
                       </button>
                     )}
-                    <button
+                    {!readOnly && <button
                       onClick={() => setConfirmAction({ type: 'delete-one', submission: selectedSub })}
                       className="p-2 border border-red-200 rounded text-red-400 hover:bg-red-50 transition-all"
                       title="Delete submission"
                     >
                       <Trash2 size={14} />
-                    </button>
-                    <button onClick={handleUpdateComments} disabled={isSaving} className="px-6 py-2 bg-[#004d33] text-white rounded text-[10px] font-black uppercase tracking-widest shadow-md disabled:opacity-50 transition-all flex items-center gap-2">
+                    </button>}
+                    {!readOnly && <button onClick={handleUpdateComments} disabled={isSaving} className="px-6 py-2 bg-[#004d33] text-white rounded text-[10px] font-black uppercase tracking-widest shadow-md disabled:opacity-50 transition-all flex items-center gap-2">
                       {isSaving ? <><RefreshCcw size={10} className="animate-spin" /> Pushing...</> : 'Finalize Review'}
-                    </button>
+                    </button>}
                   </div>
                 </div>
 
@@ -958,7 +974,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                   <div className="col-span-12 lg:col-span-4 bg-orange-50 border border-orange-100 rounded-md flex flex-col overflow-hidden shadow-sm">
                     <div className="p-4 border-b border-orange-200 bg-white/50 shrink-0">
                       <label className="text-[10px] font-black text-orange-800 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <MessageSquare size={12} /> Mentor Engine
+                        <MessageSquare size={12} /> Mentor Engine {readOnly && '· View only'}
                       </label>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-5">
@@ -970,7 +986,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section1.title}</p>
                           <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
                         </div>
-                        <textarea value={selectedSub.comments.section1 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section1: e.target.value } })}
+                        <textarea readOnly={readOnly} value={selectedSub.comments.section1 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section1: e.target.value } })}
                           className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
                       )}
@@ -982,7 +998,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section2.title}</p>
                           <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
                         </div>
-                        <textarea value={selectedSub.comments.section2 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section2: e.target.value } })}
+                        <textarea readOnly={readOnly} value={selectedSub.comments.section2 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section2: e.target.value } })}
                           className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
                       )}
@@ -994,7 +1010,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section3.title}</p>
                           <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
                         </div>
-                        <textarea value={selectedSub.comments.section3 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section3: e.target.value } })}
+                        <textarea readOnly={readOnly} value={selectedSub.comments.section3 || ''} onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section3: e.target.value } })}
                           className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Enter feedback for this section..." />
                       </div>
                       )}
@@ -1010,6 +1026,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <div key={idx} className="space-y-1">
                             <label className="text-[9px] font-black text-slate-600 uppercase">Q{idx + 1}: {q.length > 50 ? q.substring(0, 50) + '…' : q}</label>
                             <textarea
+                              readOnly={readOnly}
                               value={selectedSub.comments.section4?.[idx] || ''}
                               onChange={e => {
                                 const newComments = [...(selectedSub.comments.section4 || config.section4.questions.map(() => ''))];
@@ -1032,6 +1049,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
                         </div>
                         <textarea
+                          readOnly={readOnly}
                           value={selectedSub.comments.section5 || ''}
                           onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section5: e.target.value } })}
                           className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none"
@@ -1048,6 +1066,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                           <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
                         </div>
                         <textarea
+                          readOnly={readOnly}
                           value={selectedSub.comments.section6 || ''}
                           onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section6: e.target.value } })}
                           className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none"

@@ -32,7 +32,14 @@ function getSection1TableAnswerKey(rowIndex: number, columnIndex: number) {
 }
 
 function getPracticeScore(section3Answers: Submission['answers']['section3'], practice: string, index: number) {
-  return section3Answers[getPracticeScoreKey(index)] ?? section3Answers[practice] ?? 3;
+  const exact = section3Answers[getPracticeScoreKey(index)] ?? section3Answers[practice];
+  if (exact !== undefined) return exact;
+
+  const normalizedPractice = practice.trim().toLocaleLowerCase();
+  const legacyMatch = Object.entries(section3Answers).find(
+    ([key]) => key.trim().toLocaleLowerCase() === normalizedPractice
+  );
+  return legacyMatch?.[1] ?? 3;
 }
 
 export default function StudentConsole({ config, teachers }: StudentConsoleProps) {
@@ -164,9 +171,11 @@ export default function StudentConsole({ config, teachers }: StudentConsoleProps
       setSubmission(saved);
       const teacherEmail = getTeacherEmailByName(saved.teacherId, teachers);
       if (teacherEmail) {
-        notificationService.notifyTeacherOfStudentSubmission(saved, teacherEmail).catch(error => {
-          console.error('Failed to send teacher notification:', error);
-        });
+        studentUser.getIdToken()
+          .then(token => notificationService.notifyTeacherOfStudentSubmission(saved, teacherEmail, token))
+          .catch(error => {
+            console.error('Failed to send teacher notification:', error);
+          });
       } else {
         console.warn(`No teacher email found for ${saved.teacherId}; notification skipped.`);
       }

@@ -20,6 +20,53 @@ function isValidEmail(value: unknown) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function getBearerToken(req: VercelRequest) {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) return null;
+  return header.slice('Bearer '.length).trim() || null;
+}
+
+function normalizeEmail(value: unknown) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function isRiEmail(value: unknown) {
+  return /^[^\s@]+@(student\.)?ri\.edu\.sg$/i.test(normalizeEmail(value));
+}
+
+async function verifyFirebaseStudent(accessToken: string, expectedEmail: string) {
+  const firebaseApiKey = process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
+  if (!firebaseApiKey) throw new Error('Firebase notification verification is not configured');
+
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(firebaseApiKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken: accessToken }),
+  });
+  if (!response.ok) return false;
+
+  const body = await response.json() as { users?: Array<{ email?: string }> };
+  const verifiedEmail = normalizeEmail(body.users?.[0]?.email);
+  return !!verifiedEmail && verifiedEmail === normalizeEmail(expectedEmail) && isRiEmail(verifiedEmail);
+}
+
+async function verifySupabaseTeacher(accessToken: string) {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) throw new Error('Supabase notification verification is not configured');
+
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (!response.ok) return false;
+
+  const user = await response.json() as { email?: string };
+  return /^[^\s@]+@ri\.edu\.sg$/i.test(normalizeEmail(user.email));
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll('&', '&amp;')
@@ -29,6 +76,10 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#039;');
 }
 
+function sanitizeHeader(value: string) {
+  return value.replace(/[\r\n]+/g, ' ').trim();
+}
+
 function buildEmail(payload: NotificationPayload) {
   const studentName = escapeHtml(payload.studentName || 'A student');
   const teacherName = escapeHtml(payload.teacherName || 'Teacher');
@@ -36,7 +87,7 @@ function buildEmail(payload: NotificationPayload) {
   if (payload.type === 'student-submitted') {
     return {
       to: payload.teacherEmail,
-      subject: `${payload.studentName} submitted a leadership log`,
+      subject: `${sanitizeHeader(payload.studentName)} submitted a leadership log`,
       html: `
         <p>Dear ${teacherName},</p>
         <p>${studentName} has submitted or updated their Leadership Programme Growth Log.</p>
@@ -85,6 +136,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid notification type' });
   }
 
+  const accessToken = getBearerToken(req);
+  if (!accessToken) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const authenticated = payload.type === 'student-submitted'
+      ? await verifyFirebaseStudent(accessToken, payload.studentEmail)
+      : await verifySupabaseTeacher(accessToken);
+    if (!authenticated) {
+      return res.status(403).json({ error: 'Notification sender is not authorized' });
+    }
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message ?? 'Unable to verify notification sender' });
+  }
+
   const gmailUser = process.env.GMAIL_USER;
   const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '');
   const fromHeader = process.env.NOTIFICATION_FROM_EMAIL || (gmailUser ? `Leadership Programme <${gmailUser}>` : '');
@@ -96,11 +163,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'GMAIL_APP_PASSWORD is not configured' });
   }
 
-  if (payload.type === 'student-submitted' && !isValidEmail(payload.teacherEmail)) {
+  if (payload.type === 'student-submitted' && (!isValidEmail(payload.teacherEmail) || !isRiEmail(payload.teacherEmail))) {
     return res.status(400).json({ error: 'Teacher email is missing or invalid' });
   }
 
-  if (payload.type === 'teacher-reviewed' && !isValidEmail(payload.studentEmail)) {
+  if (payload.type === 'teacher-reviewed' && (!isValidEmail(payload.studentEmail) || !isRiEmail(payload.studentEmail))) {
     return res.status(400).json({ error: 'Student email is missing or invalid' });
   }
 

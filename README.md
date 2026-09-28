@@ -14,7 +14,33 @@ View your app in AI Studio: https://ai.studio/apps/21d8a362-e3f7-4056-b655-a0614
 
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+   `npm ci`
+2. Copy `.env.example` to `.env.local` and add the Firebase and Supabase public configuration.
+3. Run the app with its local notification API:
    `npm run dev`
+
+## Read-only live-data preview
+
+To review the upgraded interface against the existing v1 Supabase records without
+allowing the local app to change them, add these values to `.env.local`:
+
+```env
+VITE_READ_ONLY_MODE=true
+VITE_LOCAL_DATA_PREVIEW=true
+```
+
+Then run `npm run dev:vite`. The local-only Admin preview loads the live
+submissions and mentor directory, hides all mutation controls, and rejects any
+write that reaches the storage service. The preview bypass is also guarded by
+`import.meta.env.DEV`, so it cannot be enabled by a production build.
+
+Keep both flags unset or `false` in Vercel. `.env.local` is ignored by Git and
+must never be committed.
+
+## Database compatibility
+
+The upgraded v1 app continues to read and write the original
+`leadership_growth_log` table. Existing four-section answer JSON is normalized
+in memory so it remains visible alongside the optional Section 5 and Section 6
+fields. The SQL in `supabase/schema.sql` is additive and does not drop, rename,
+truncate, or copy the submissions table.

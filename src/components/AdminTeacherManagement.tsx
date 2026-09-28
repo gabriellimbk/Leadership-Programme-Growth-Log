@@ -7,13 +7,14 @@ import { storageService } from '../services/storageService';
 interface Props {
   teachers: TeacherEntry[];
   onTeachersUpdate: (teachers: TeacherEntry[]) => void;
+  readOnly?: boolean;
 }
 
 function isValidRiEmail(email: string) {
   return /^[^\s@]+@ri\.edu\.sg$/i.test(email.trim());
 }
 
-export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: Props) {
+export default function AdminTeacherManagement({ teachers, onTeachersUpdate, readOnly = false }: Props) {
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [adding, setAdding] = useState(false);
@@ -114,6 +115,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
       <div className="max-w-3xl mx-auto space-y-6">
 
         {/* Add new teacher */}
+        {!readOnly && (
         <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm">
           <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Add New Teacher</h2>
           <p className="text-[12px] font-extrabold text-slate-800 italic mb-5">
@@ -159,6 +161,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
             </p>
           )}
         </div>
+        )}
 
         {/* Existing teachers */}
         <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm">
@@ -166,7 +169,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
             Current Teachers ({teachers.length})
           </h2>
           <p className="text-[12px] font-extrabold text-slate-800 italic mb-5">
-            Edit or remove teachers from the mentor directory.
+            {readOnly ? 'Live mentor directory shown without editing controls.' : 'Edit or remove teachers from the mentor directory.'}
           </p>
 
           {teachers.length === 0 ? (
@@ -178,7 +181,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
               {teachers.map(teacher => {
                 const isEditing = editingId === teacher.id;
                 return (
-                  <div key={teacher.id} className="py-3 first:pt-0 last:pb-0">
+                  <div key={teacher.id} data-testid="teacher-row" className="py-3 first:pt-0 last:pb-0">
                     {isEditing ? (
                       <div className="space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -226,7 +229,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
                           <p className="text-[12px] font-black text-slate-800 uppercase tracking-tight truncate">{teacher.name}</p>
                           <p className="text-[10px] text-slate-500 font-bold truncate">{teacher.email}</p>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        {!readOnly && <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => beginEdit(teacher)}
                             className="p-2 rounded text-slate-400 hover:text-[#004d33] hover:bg-emerald-50 transition-all"
@@ -241,7 +244,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
                           >
                             <Trash2 size={13} />
                           </button>
-                        </div>
+                        </div>}
                       </div>
                     )}
                   </div>
@@ -253,7 +256,7 @@ export default function AdminTeacherManagement({ teachers, onTeachersUpdate }: P
       </div>
 
       {/* Delete confirmation */}
-      {deleteTarget && (
+      {!readOnly && deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
