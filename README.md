@@ -44,3 +44,13 @@ The upgraded v1 app continues to read and write the original
 in memory so it remains visible alongside the optional Section 5 and Section 6
 fields. The SQL in `supabase/schema.sql` is additive and does not drop, rename,
 truncate, or copy the submissions table.
+
+## Supabase mentor OTP email
+
+The mentor login uses a six-digit Supabase email OTP. In Supabase, open
+**Authentication → Email Templates → Magic Link** and use the code-only template
+in `supabase/email-templates/mentor-otp.html`.
+
+The template intentionally contains `{{ .Token }}` and no
+`{{ .ConfirmationURL }}`. School mail security tools can pre-open confirmation
+links and consume the token before the teacher enters the six-digit code.
