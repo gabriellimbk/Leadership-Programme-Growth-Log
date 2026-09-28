@@ -100,6 +100,8 @@ function normalizeConfig(config?: Partial<FormConfig> | null): FormConfig {
   const source = config ?? {};
   const legacySection5 = source.section5 as (Partial<FormConfig['section5']> & { question?: string }) | undefined;
   const legacySection6 = source.section6 as (Partial<FormConfig['section6']> & { question?: string }) | undefined;
+  const hasUpgradedSection5 = Array.isArray(source.section5?.questions);
+  const hasUpgradedSection6 = Array.isArray(source.section6?.questions);
   const section2 = {
     ...DEFAULT_CONFIG.section2,
     ...source.section2,
@@ -128,7 +130,7 @@ function normalizeConfig(config?: Partial<FormConfig> | null): FormConfig {
     section5: {
       ...DEFAULT_CONFIG.section5,
       ...source.section5,
-      enabled: source.section5?.enabled ?? true,
+      enabled: hasUpgradedSection5 ? source.section5?.enabled ?? true : true,
       questions: normalizeQuestions(
         source.section5?.questions,
         6,
@@ -140,7 +142,7 @@ function normalizeConfig(config?: Partial<FormConfig> | null): FormConfig {
     section6: {
       ...DEFAULT_CONFIG.section6,
       ...source.section6,
-      enabled: source.section6?.enabled ?? true,
+      enabled: hasUpgradedSection6 ? source.section6?.enabled ?? true : true,
       questions: normalizeQuestions(
         source.section6?.questions,
         5,
