@@ -31,7 +31,9 @@ VITE_LOCAL_DATA_PREVIEW=true
 
 Then run `npm run dev:vite`. The local-only Admin preview loads the live
 submissions and mentor directory, hides all mutation controls, and rejects any
-write that reaches the storage service. The preview bypass is also guarded by
+write that reaches the storage service. The form-design editor remains available;
+its question and title changes are saved only as a browser-local draft and are
+never sent to Supabase. The preview bypass is also guarded by
 `import.meta.env.DEV`, so it cannot be enabled by a production build.
 
 Keep both flags unset or `false` in Vercel. `.env.local` is ignored by Git and

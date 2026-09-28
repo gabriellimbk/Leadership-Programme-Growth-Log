@@ -10,6 +10,7 @@ import { isAdminTeacherEmail } from './auth/adminAccess';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogOut } from 'lucide-react';
 import { isLocalDataPreview, isReadOnlyMode } from './runtimeConfig';
+import { loadLocalConfigDraft, saveLocalConfigDraft } from './services/localConfigDraft';
 
 function AppContent() {
   const [view, setView] = useState<ViewMode>(isLocalDataPreview ? 'admin' : 'landing');
@@ -19,12 +20,19 @@ function AppContent() {
   const canAccessAdmin = isLocalDataPreview || isAdminTeacherEmail(teacherSession?.user.email);
 
   useEffect(() => {
-    storageService.getConfig().then(setConfig);
+    storageService.getConfig().then(remoteConfig => {
+      setConfig(isLocalDataPreview ? loadLocalConfigDraft(remoteConfig) : remoteConfig);
+    });
     storageService.getTeachers().then(setTeachers).catch(err => {
       console.error('Failed to load teachers:', err);
       setTeachers([]);
     });
   }, []);
+
+  const handleConfigUpdate = (updatedConfig: FormConfig) => {
+    if (isLocalDataPreview) saveLocalConfigDraft(updatedConfig);
+    setConfig(updatedConfig);
+  };
 
   const handleSignOut = async () => {
     if (isLocalDataPreview) {
@@ -114,12 +122,18 @@ function AppContent() {
           )}
           {view === 'teacher' && (
             <motion.div key="teacher" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-              <TeacherConsole config={config} onConfigUpdate={setConfig} teachers={teachers} readOnly={isLocalDataPreview} />
+              <TeacherConsole
+                config={config}
+                onConfigUpdate={handleConfigUpdate}
+                teachers={teachers}
+                readOnly={isLocalDataPreview}
+                allowConfigEditing={isLocalDataPreview}
+              />
             </motion.div>
           )}
           {view === 'admin' && (
             <motion.div key="admin" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-              <AdminConsole config={config} onConfigUpdate={setConfig} teachers={teachers} onTeachersUpdate={setTeachers} previewMode={isLocalDataPreview} />
+              <AdminConsole config={config} onConfigUpdate={handleConfigUpdate} teachers={teachers} onTeachersUpdate={setTeachers} previewMode={isLocalDataPreview} />
             </motion.div>
           )}
         </AnimatePresence>

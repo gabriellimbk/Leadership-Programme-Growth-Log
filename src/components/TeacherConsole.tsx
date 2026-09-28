@@ -17,6 +17,7 @@ interface TeacherConsoleProps {
   mode?: 'teacher' | 'admin';
   readOnly?: boolean;
   bypassAuth?: boolean;
+  allowConfigEditing?: boolean;
 }
 
 type EditableSectionKey = 'section1' | 'section2' | 'section3' | 'section4' | 'section5' | 'section6';
@@ -153,7 +154,15 @@ function MoveDialog({ action, teachers, onChangeTeacher, onConfirm, onCancel }: 
   );
 }
 
-export default function TeacherConsole({ config, onConfigUpdate, teachers, mode = 'teacher', readOnly = false, bypassAuth = false }: TeacherConsoleProps) {
+export default function TeacherConsole({
+  config,
+  onConfigUpdate,
+  teachers,
+  mode = 'teacher',
+  readOnly = false,
+  bypassAuth = false,
+  allowConfigEditing = false,
+}: TeacherConsoleProps) {
   const { teacherSession, teacherLoading } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
@@ -203,9 +212,10 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
   };
 
   const handleUpdateConfig = async () => {
+    if (readOnly && !allowConfigEditing) return;
     setIsSaving(true);
     try {
-      await storageService.saveConfig(editableConfig);
+      if (!readOnly) await storageService.saveConfig(editableConfig);
       onConfigUpdate(editableConfig);
       setIsEditingConfig(false);
     } finally {
@@ -284,6 +294,7 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
   }
 
   const isAdminMode = mode === 'admin';
+  const canEditConfig = !readOnly || allowConfigEditing;
   const assignedTeacherName = teacherSession
     ? getTeacherNameForEmail(teacherSession.user.email, teachers)
     : null;
@@ -328,8 +339,10 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
             <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
               {isAdminMode ? 'Admin Growth Log Queue' : 'Growth Log Queue'}
             </label>
-            {!readOnly && <button
+            {canEditConfig && <button
               onClick={() => { setEditableConfig(config); setIsEditingConfig(!isEditingConfig); }}
+              aria-label="Edit form questions and titles"
+              title={readOnly ? 'Edit local form draft' : 'Edit form configuration'}
               className={`p-1.5 rounded transition-all ${isEditingConfig ? 'bg-[#004d33] text-white shadow-lg' : 'hover:bg-white/5 text-slate-500'}`}
             >
               <Settings size={12} />
@@ -457,11 +470,18 @@ export default function TeacherConsole({ config, onConfigUpdate, teachers, mode 
                   <div>
                     <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Framework Configuration</h2>
                     <p className="text-[12px] font-extrabold text-slate-800 italic mt-0.5">Deployment of leadership pedagogical parameters.</p>
+                    {readOnly && allowConfigEditing && (
+                      <p className="text-[9px] font-black uppercase tracking-widest text-amber-700 mt-1">
+                        Local draft only · Supabase remains unchanged
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <button onClick={() => setIsEditingConfig(false)} className="px-4 py-2 rounded text-[10px] font-bold text-slate-500 hover:bg-slate-200 transition-all">Cancel</button>
                     <button onClick={handleUpdateConfig} disabled={isSaving} className="px-6 py-2 bg-[#004d33] text-white rounded text-[10px] font-bold uppercase tracking-widest shadow-md disabled:opacity-50 transition-all flex items-center gap-2">
-                      {isSaving ? <><RefreshCcw size={10} className="animate-spin" /> Deploying...</> : 'Deploy Framework'}
+                      {isSaving
+                        ? <><RefreshCcw size={10} className="animate-spin" /> Saving...</>
+                        : readOnly && allowConfigEditing ? 'Save Local Draft' : 'Deploy Framework'}
                     </button>
                   </div>
                 </div>
