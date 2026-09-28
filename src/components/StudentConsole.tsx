@@ -437,6 +437,17 @@ export default function StudentConsole({ config, teachers }: StudentConsoleProps
                   <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-400">
                     <span>1</span><span>5</span>
                   </div>
+                  {submission?.comments.section5?.[0] && (
+                    <div className="p-4 bg-amber-50 border border-amber-100 rounded-r-md rounded-bl-md flex gap-3.5 items-start shadow-sm border-l-4 border-l-amber-400">
+                      <div className="p-1.5 bg-white rounded text-amber-500 shrink-0 border border-amber-50 shadow-sm">
+                        <MessageSquare size={12} />
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5 opacity-50">Mentor Insight on Q1</div>
+                        <p className="text-[11px] text-amber-900 font-medium italic leading-relaxed">{submission.comments.section5[0]}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -458,21 +469,21 @@ export default function StudentConsole({ config, teachers }: StudentConsoleProps
                       className="w-full text-[12px] border border-slate-200 rounded-md p-4 min-h-[140px] focus:bg-white bg-slate-50/50 transition-all outline-none leading-relaxed font-medium focus:ring-2 focus:ring-[#004d33]/20"
                       placeholder="Type your response here..."
                     />
+                    {submission?.comments.section5?.[index + 1] && (
+                      <div className="p-4 bg-amber-50 border border-amber-100 rounded-r-md rounded-bl-md flex gap-3.5 items-start shadow-sm border-l-4 border-l-amber-400">
+                        <div className="p-1.5 bg-white rounded text-amber-500 shrink-0 border border-amber-50 shadow-sm">
+                          <MessageSquare size={12} />
+                        </div>
+                        <div>
+                          <div className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5 opacity-50">Mentor Insight on Q{index + 2}</div>
+                          <p className="text-[11px] text-amber-900 font-medium italic leading-relaxed">{submission.comments.section5[index + 1]}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-            {submission?.comments?.section5 && (
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-r-md rounded-bl-md flex gap-3.5 items-start shadow-sm border-l-4 border-l-amber-400">
-                <div className="p-1.5 bg-white rounded text-amber-500 shrink-0 border border-amber-50 shadow-sm">
-                  <MessageSquare size={12} />
-                </div>
-                <div>
-                  <div className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5 opacity-50">Mentor Insight</div>
-                  <p className="text-[11px] text-amber-900 font-medium italic leading-relaxed">{submission.comments.section5}</p>
-                </div>
-              </div>
-            )}
             </div>
           )}
 
@@ -501,21 +512,21 @@ export default function StudentConsole({ config, teachers }: StudentConsoleProps
                       className="w-full text-[12px] border border-slate-200 rounded-md p-4 min-h-[140px] focus:bg-white bg-slate-50/50 transition-all outline-none leading-relaxed font-medium focus:ring-2 focus:ring-[#004d33]/20"
                       placeholder="Type your response here..."
                     />
+                    {submission?.comments.section6?.[index] && (
+                      <div className="p-4 bg-amber-50 border border-amber-100 rounded-r-md rounded-bl-md flex gap-3.5 items-start shadow-sm border-l-4 border-l-amber-400">
+                        <div className="p-1.5 bg-white rounded text-amber-500 shrink-0 border border-amber-50 shadow-sm">
+                          <MessageSquare size={12} />
+                        </div>
+                        <div>
+                          <div className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5 opacity-50">Mentor Insight on Q{index + 1}</div>
+                          <p className="text-[11px] text-amber-900 font-medium italic leading-relaxed">{submission.comments.section6[index]}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-            {submission?.comments?.section6 && (
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-r-md rounded-bl-md flex gap-3.5 items-start shadow-sm border-l-4 border-l-amber-400">
-                <div className="p-1.5 bg-white rounded text-amber-500 shrink-0 border border-amber-50 shadow-sm">
-                  <MessageSquare size={12} />
-                </div>
-                <div>
-                  <div className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none mb-1.5 opacity-50">Mentor Insight</div>
-                  <p className="text-[11px] text-amber-900 font-medium italic leading-relaxed">{submission.comments.section6}</p>
-                </div>
-              </div>
-            )}
             </div>
           )}
 

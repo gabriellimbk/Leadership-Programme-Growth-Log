@@ -64,8 +64,8 @@ export interface Submission {
     section2?: string;
     section3?: string;
     section4?: string[];
-    section5?: string;
-    section6?: string;
+    section5?: string[];
+    section6?: string[];
   };
   status: 'draft' | 'submitted' | 'reviewed';
   updatedAt: any;

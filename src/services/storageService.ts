@@ -191,10 +191,34 @@ function normalizeAnswers(answers: Partial<Submission['answers']> | null | undef
   };
 }
 
-function normalizeComments(comments: Submission['comments'] | null | undefined): Submission['comments'] {
+function normalizeCommentArray(value: unknown, count: number, legacyCommentIndex = 0): string[] {
+  if (Array.isArray(value)) {
+    return Array.from({ length: count }, (_, index) =>
+      typeof value[index] === 'string' ? value[index] : ''
+    );
+  }
+
+  return Array.from({ length: count }, (_, index) =>
+    index === legacyCommentIndex && typeof value === 'string' ? value : ''
+  );
+}
+
+function normalizeComments(comments: unknown): Submission['comments'] {
+  const source = comments && typeof comments === 'object' && !Array.isArray(comments)
+    ? comments as Record<string, unknown>
+    : {};
+
   return {
-    ...(comments ?? {}),
-    section4: Array.isArray(comments?.section4) ? comments.section4 : [],
+    section1: typeof source.section1 === 'string' ? source.section1 : undefined,
+    section2: typeof source.section2 === 'string' ? source.section2 : undefined,
+    section3: typeof source.section3 === 'string' ? source.section3 : undefined,
+    section4: Array.isArray(source.section4)
+      ? source.section4.map(comment => typeof comment === 'string' ? comment : '')
+      : [],
+    // The old Section 5 comment described its single written response, which
+    // is now Question 2 because Question 1 is the new rating scale.
+    section5: normalizeCommentArray(source.section5, 6, 1),
+    section6: normalizeCommentArray(source.section6, 5),
   };
 }
 

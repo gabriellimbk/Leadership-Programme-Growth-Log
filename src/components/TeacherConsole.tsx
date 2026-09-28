@@ -1004,37 +1004,55 @@ export default function TeacherConsole({
                       </div>
                       )}
 
-                      {/* Section 5 feedback */}
+                      {/* Section 5 per-question feedback */}
                       {isSectionEnabled(config.section5) && (
-                      <div className="space-y-2 pt-2 border-t border-orange-200">
+                      <div className="space-y-4 pt-2 border-t border-orange-200">
                         <div className="pb-1 border-b border-orange-200">
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section5.title}</p>
-                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Per-Question Feedback</p>
                         </div>
-                        <textarea
-                          readOnly={readOnly}
-                          value={selectedSub.comments.section5 || ''}
-                          onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section5: e.target.value } })}
-                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none"
-                          placeholder="Enter feedback for this section..."
-                        />
+                        {config.section5.questions.map((question, index) => (
+                          <div key={index} className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-600 uppercase">Q{index + 1}: {question.length > 50 ? question.substring(0, 50) + '…' : question}</label>
+                            <textarea
+                              readOnly={readOnly}
+                              value={selectedSub.comments.section5?.[index] || ''}
+                              onChange={e => {
+                                const comments = [...(selectedSub.comments.section5 || config.section5.questions.map(() => ''))];
+                                comments[index] = e.target.value;
+                                setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section5: comments } });
+                              }}
+                              className="w-full text-[10px] p-2 bg-white border border-orange-100 rounded italic min-h-[50px] focus:ring-1 focus:ring-orange-500 outline-none"
+                              placeholder="Comment..."
+                            />
+                          </div>
+                        ))}
                       </div>
                       )}
 
-                      {/* Section 6 feedback */}
+                      {/* Section 6 per-question feedback */}
                       {isSectionEnabled(config.section6) && (
-                      <div className="space-y-2 pt-2 border-t border-orange-200">
+                      <div className="space-y-4 pt-2 border-t border-orange-200">
                         <div className="pb-1 border-b border-orange-200">
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{config.section6.title}</p>
-                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Mentor Feedback</p>
+                          <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest mt-0.5">Per-Question Feedback</p>
                         </div>
-                        <textarea
-                          readOnly={readOnly}
-                          value={selectedSub.comments.section6 || ''}
-                          onChange={e => setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section6: e.target.value } })}
-                          className="w-full text-[11px] p-3 bg-white border border-orange-100 rounded italic min-h-[80px] focus:ring-1 focus:ring-orange-500 outline-none"
-                          placeholder="Enter feedback for this section..."
-                        />
+                        {config.section6.questions.map((question, index) => (
+                          <div key={index} className="space-y-1">
+                            <label className="text-[9px] font-black text-slate-600 uppercase">Q{index + 1}: {question.length > 50 ? question.substring(0, 50) + '…' : question}</label>
+                            <textarea
+                              readOnly={readOnly}
+                              value={selectedSub.comments.section6?.[index] || ''}
+                              onChange={e => {
+                                const comments = [...(selectedSub.comments.section6 || config.section6.questions.map(() => ''))];
+                                comments[index] = e.target.value;
+                                setSelectedSub({ ...selectedSub, comments: { ...selectedSub.comments, section6: comments } });
+                              }}
+                              className="w-full text-[10px] p-2 bg-white border border-orange-100 rounded italic min-h-[50px] focus:ring-1 focus:ring-orange-500 outline-none"
+                              placeholder="Comment..."
+                            />
+                          </div>
+                        ))}
                       </div>
                       )}
 
