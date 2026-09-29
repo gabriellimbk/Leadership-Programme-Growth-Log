@@ -61,7 +61,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS teachers_name_idx
 INSERT INTO public.teachers (name, email)
 SELECT seed.name, seed.email
 FROM (VALUES
-  ('Mr Ridzuan',        'ridzuan@ri.edu.sg'),
+  ('Mr Ridzuan',        'ridzuan.ab@ri.edu.sg'),
   ('Ms Veronica Chua',  'veronica.chua@ri.edu.sg'),
   ('Ms Ruth Rodrigues', 'rodrigues.ruth@ri.edu.sg'),
   ('Ms Tang Mui Kee',   'muikee.tang@ri.edu.sg'),
@@ -127,7 +127,7 @@ CREATE POLICY "teachers_write_admin"
     LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
       'gabriel.lim@ri.edu.sg',
       'cheekeong.lee@ri.edu.sg',
-      'ridzuan@ri.edu.sg',
+      'ridzuan.ab@ri.edu.sg',
       'shi-ting.hwang@ri.edu.sg',
       'janissa.soh@ri.edu.sg',
       'veronica.chua@ri.edu.sg',
@@ -139,7 +139,7 @@ CREATE POLICY "teachers_write_admin"
     LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
       'gabriel.lim@ri.edu.sg',
       'cheekeong.lee@ri.edu.sg',
-      'ridzuan@ri.edu.sg',
+      'ridzuan.ab@ri.edu.sg',
       'shi-ting.hwang@ri.edu.sg',
       'janissa.soh@ri.edu.sg',
       'veronica.chua@ri.edu.sg',
