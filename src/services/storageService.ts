@@ -6,6 +6,7 @@ import { assertWritable } from '../runtimeConfig';
 // place and continues to load after the UI upgrade.
 const SUBMISSIONS_TABLE = 'leadership_growth_log';
 const TEACHERS_TABLE = 'v1_teachers';
+const FORM_CONFIG_TABLE = 'v1_form_config';
 
 const DEFAULT_CONFIG: FormConfig = {
   id: 'default',
@@ -243,7 +244,7 @@ function rowToSubmission(row: any): Submission {
 export const storageService = {
   getConfig: async (): Promise<FormConfig> => {
     const { data, error } = await supabase
-      .from('form_config')
+      .from(FORM_CONFIG_TABLE)
       .select('config')
       .eq('id', 'default')
       .maybeSingle();
@@ -253,7 +254,7 @@ export const storageService = {
 
   saveConfig: async (config: FormConfig): Promise<void> => {
     assertWritable('Saving the framework configuration');
-    const { error } = await supabase.from('form_config').upsert({
+    const { error } = await supabase.from(FORM_CONFIG_TABLE).upsert({
       id: 'default',
       config: normalizeConfig(config),
       updated_at: new Date().toISOString()

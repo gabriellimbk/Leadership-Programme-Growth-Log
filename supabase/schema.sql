@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS leadership_growth_log_teacher_id_updated_at_idx
 
 -- Form configuration remains a separate single-row document. Existing JSON is
 -- retained; the app fills missing v2 fields in memory without rewriting it.
-CREATE TABLE IF NOT EXISTS public.form_config (
+CREATE TABLE IF NOT EXISTS public.v1_form_config (
   id TEXT PRIMARY KEY DEFAULT 'default',
   config JSONB NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -83,7 +83,7 @@ WHERE NOT EXISTS (
 );
 
 ALTER TABLE public.leadership_growth_log ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.form_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.v1_form_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.v1_teachers ENABLE ROW LEVEL SECURITY;
 
 -- Preserve the live submission policies for compatibility. Student writes
@@ -95,19 +95,43 @@ ALTER TABLE public.v1_teachers ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can read the form definition; signed-in Supabase teachers can edit
 -- it. TO clauses replace the deprecated auth.role() policy pattern.
-DROP POLICY IF EXISTS "config_read_all" ON public.form_config;
-DROP POLICY IF EXISTS "config_write_auth" ON public.form_config;
+DROP POLICY IF EXISTS "config_read_all" ON public.v1_form_config;
+DROP POLICY IF EXISTS "config_write_auth" ON public.v1_form_config;
+DROP POLICY IF EXISTS "v1_form_config_read" ON public.v1_form_config;
+DROP POLICY IF EXISTS "v1_form_config_write_admin" ON public.v1_form_config;
 
-CREATE POLICY "config_read_all"
-  ON public.form_config FOR SELECT
+CREATE POLICY "v1_form_config_read"
+  ON public.v1_form_config FOR SELECT
   TO anon, authenticated
   USING (true);
 
-CREATE POLICY "config_write_auth"
-  ON public.form_config FOR ALL
+CREATE POLICY "v1_form_config_write_admin"
+  ON public.v1_form_config FOR ALL
   TO authenticated
-  USING (true)
-  WITH CHECK (true);
+  USING (
+    LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
+      'gabriel.lim@ri.edu.sg',
+      'cheekeong.lee@ri.edu.sg',
+      'ridzuan.ab@ri.edu.sg',
+      'shi-ting.hwang@ri.edu.sg',
+      'janissa.soh@ri.edu.sg',
+      'veronica.chua@ri.edu.sg',
+      'jialin.ma@ri.edu.sg',
+      'kuangwen.chan@ri.edu.sg'
+    ])
+  )
+  WITH CHECK (
+    LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
+      'gabriel.lim@ri.edu.sg',
+      'cheekeong.lee@ri.edu.sg',
+      'ridzuan.ab@ri.edu.sg',
+      'shi-ting.hwang@ri.edu.sg',
+      'janissa.soh@ri.edu.sg',
+      'veronica.chua@ri.edu.sg',
+      'jialin.ma@ri.edu.sg',
+      'kuangwen.chan@ri.edu.sg'
+    ])
+  );
 
 -- Students need the mentor directory during setup. Directory changes are
 -- restricted to the administrator accounts recognised by the UI.
@@ -150,9 +174,9 @@ CREATE POLICY "v1_teachers_write_admin"
     ])
   );
 
-GRANT SELECT ON public.form_config, public.v1_teachers TO anon;
-GRANT SELECT ON public.form_config, public.v1_teachers TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.form_config, public.v1_teachers TO authenticated;
+GRANT SELECT ON public.v1_form_config, public.v1_teachers TO anon;
+GRANT SELECT ON public.v1_form_config, public.v1_teachers TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.v1_form_config, public.v1_teachers TO authenticated;
 
 -- Teacher OTP accounts still need to exist in Supabase Authentication before
 -- they can request a sign-in code.
