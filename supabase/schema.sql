@@ -44,21 +44,21 @@ CREATE TABLE IF NOT EXISTS public.form_config (
 );
 
 -- Dynamic teacher directory used by student selection and the admin console.
-CREATE TABLE IF NOT EXISTS public.teachers (
+CREATE TABLE IF NOT EXISTS public.v1_teachers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS teachers_email_idx
-  ON public.teachers (LOWER(email));
+CREATE UNIQUE INDEX IF NOT EXISTS v1_teachers_email_idx
+  ON public.v1_teachers (LOWER(email));
 
-CREATE UNIQUE INDEX IF NOT EXISTS teachers_name_idx
-  ON public.teachers (LOWER(name));
+CREATE UNIQUE INDEX IF NOT EXISTS v1_teachers_name_idx
+  ON public.v1_teachers (LOWER(name));
 
 -- Add known mentors only when their email is not already present.
-INSERT INTO public.teachers (name, email)
+INSERT INTO public.v1_teachers (name, email)
 SELECT seed.name, seed.email
 FROM (VALUES
   ('Mr Ridzuan',        'ridzuan.ab@ri.edu.sg'),
@@ -78,13 +78,13 @@ FROM (VALUES
   ('Mr Lee Chee Keong', 'cheekeong.lee@ri.edu.sg')
 ) AS seed(name, email)
 WHERE NOT EXISTS (
-  SELECT 1 FROM public.teachers existing
+  SELECT 1 FROM public.v1_teachers existing
   WHERE LOWER(existing.email) = LOWER(seed.email)
 );
 
 ALTER TABLE public.leadership_growth_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.form_config ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.v1_teachers ENABLE ROW LEVEL SECURITY;
 
 -- Preserve the live submission policies for compatibility. Student writes
 -- currently use Firebase Auth while the Data API receives the Supabase public
@@ -111,17 +111,19 @@ CREATE POLICY "config_write_auth"
 
 -- Students need the mentor directory during setup. Directory changes are
 -- restricted to the administrator accounts recognised by the UI.
-DROP POLICY IF EXISTS "teachers_read_all" ON public.teachers;
-DROP POLICY IF EXISTS "teachers_write_auth" ON public.teachers;
-DROP POLICY IF EXISTS "teachers_write_admin" ON public.teachers;
+DROP POLICY IF EXISTS "teachers_read_all" ON public.v1_teachers;
+DROP POLICY IF EXISTS "teachers_write_auth" ON public.v1_teachers;
+DROP POLICY IF EXISTS "teachers_write_admin" ON public.v1_teachers;
+DROP POLICY IF EXISTS "v1_teachers_read" ON public.v1_teachers;
+DROP POLICY IF EXISTS "v1_teachers_write_admin" ON public.v1_teachers;
 
-CREATE POLICY "teachers_read_all"
-  ON public.teachers FOR SELECT
+CREATE POLICY "v1_teachers_read"
+  ON public.v1_teachers FOR SELECT
   TO anon, authenticated
   USING (true);
 
-CREATE POLICY "teachers_write_admin"
-  ON public.teachers FOR ALL
+CREATE POLICY "v1_teachers_write_admin"
+  ON public.v1_teachers FOR ALL
   TO authenticated
   USING (
     LOWER((SELECT auth.jwt() ->> 'email')) = ANY (ARRAY[
@@ -148,9 +150,9 @@ CREATE POLICY "teachers_write_admin"
     ])
   );
 
-GRANT SELECT ON public.form_config, public.teachers TO anon;
-GRANT SELECT ON public.form_config, public.teachers TO authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.form_config, public.teachers TO authenticated;
+GRANT SELECT ON public.form_config, public.v1_teachers TO anon;
+GRANT SELECT ON public.form_config, public.v1_teachers TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.form_config, public.v1_teachers TO authenticated;
 
 -- Teacher OTP accounts still need to exist in Supabase Authentication before
 -- they can request a sign-in code.

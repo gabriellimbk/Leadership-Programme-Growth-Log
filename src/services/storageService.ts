@@ -5,7 +5,7 @@ import { assertWritable } from '../runtimeConfig';
 // Keep v1 on its original table so every existing production row remains in
 // place and continues to load after the UI upgrade.
 const SUBMISSIONS_TABLE = 'leadership_growth_log';
-const TEACHERS_TABLE = 'teachers';
+const TEACHERS_TABLE = 'v1_teachers';
 
 const DEFAULT_CONFIG: FormConfig = {
   id: 'default',
